@@ -1,23 +1,26 @@
-import logo from './logo.svg';
 import './App.css';
+import Playlist from './components/Playlist';
+import SearchBar from './components/SearchBar';
+import TrackList from './components/TrackList';
+//import Playlist from './components/Playlist'; it does not work i dont know why
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h1>Jammming</h1>
+        <SearchBar />
       </header>
+      <main>
+        <div id="boxGrid">
+          <div id="results">
+            <TrackList />
+          </div>
+          <div>
+            
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
