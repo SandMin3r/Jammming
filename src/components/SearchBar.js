@@ -3,7 +3,7 @@
 function SearchBar() {
     return (
         <>
-            <form onSubmit="">
+            <form onSubmit={()=>{}}>
                 <input 
                     type="text"
                     id="SearchBar"
