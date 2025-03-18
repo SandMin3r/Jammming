@@ -1,16 +1,27 @@
+import { useState } from "react";
 
+function SearchBar({ onSearch }) {
+    const [searchTerm, setSearchTerm] = useState("");
 
-function SearchBar() {
+    const handleSubmit = (e) => {
+        e.preventDefault();  // Prevents page reload
+        if (searchTerm.trim() !== "") {
+            onSearch(searchTerm);  // Pass search term to parent component
+        }
+    };
     return (
         <>
-            <form onSubmit={()=>{}}>
+            <form onSubmit={handleSubmit}>
                 <input 
                     type="text"
                     id="SearchBar"
+                    placeholder="Search for a song..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                 ></input>
                 <button 
-                        type="submit"
                         id="SearchButton"
+                        type="submit"
                 >Search</button>
             </form>
         </>

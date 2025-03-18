@@ -1,35 +1,35 @@
 import styles from './Playlist.module.css';
 
-function Playlist({playlist, removeFromPlaylist}) {
+function Playlist({playlist, removeFromPlaylist, playlistName, setPlaylistName, saveToSpotify}) {
     return(
         <div>
-            <form onSubmit={()=>{}}>
-                <input 
-                    type="text"
-                    id="playlistName"
-                    placeholder="Playlist name"
-                    className={styles.form__field}
-                ></input>
-                {playlist.length > 0 ? (
-                    playlist.map(track => (
-                            <div key={track.id} class="track">
-                                <div>
-                                    <h3>{track.name}</h3>
-                                    <p>{track.artist} - {track.album}</p>
-                                </div>
-                                <div class="button">
-                                    <p onClick={() => {removeFromPlaylist(track.id)}}>-</p>
-                                </div>
-                            </div>
+            <input 
+                type="text"
+                id="playlistName"
+                value={playlistName}
+                onChange={(e) => setPlaylistName(e.target.value)}
+                placeholder="Playlist name"
+                className={styles.form__field}
+            ></input>
+            {playlist.length > 0 ? (
+                playlist.map(track => (
+                    <div key={track.id} class="track">
+                        <div>
+                            <h3>{track.name}</h3>
+                            <p>{track.artists.map(artist => artist.name).join(', ')} - {track.album.name}</p>
+                        </div>
+                        <div class="button">
+                            <p onClick={() => {removeFromPlaylist(track.id)}}>-</p>
+                        </div>
+                    </div>
                     ))
                     ) : (
                     <p>No songs in playlist.</p>
                 )}
-                <button 
-                    type="submit"
-                    id="saveToSpotify"
-                >Save to Spotify</button>
-            </form>
+            <button 
+                onClick={saveToSpotify}
+                disabled={playlist.length === 0}
+            >Save to Spotify</button>
         </div>
     )
 };

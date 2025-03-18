@@ -1,6 +1,7 @@
 
 
 function TrackList({searchResults, addToPlaylist}) {
+    console.log(searchResults);
     return (
         <div>
             <h2>Results</h2>
@@ -9,7 +10,7 @@ function TrackList({searchResults, addToPlaylist}) {
                     <div key={track.id} class="track">
                         <div>
                             <h3>{track.name}</h3>
-                            <p>{track.artist} - {track.album}</p>
+                            <p>{track.artists.map(artist => artist.name).join(', ')} - {track.album.name}</p>
                         </div>
                         <div class="button">
                             <p onClick={() => addToPlaylist(track)}>+</p>
