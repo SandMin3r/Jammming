@@ -8,9 +8,14 @@ function TrackList({searchResults, addToPlaylist}) {
             {searchResults.length > 0 ? (
                 searchResults.map(track => (
                     <div key={track.id} class="track">
-                        <div>
-                            <h3>{track.name}</h3>
-                            <p>{track.artists.map(artist => artist.name).join(', ')} - {track.album.name}</p>
+                        <div class="inline">
+                            <img
+                                src={track.album.images[1].url}
+                                alt={track.album.name}></img>
+                            <div>
+                                <h3>{track.name}</h3>
+                                <p>{track.artists.map(artist => artist.name).join(', ')} - {track.album.name}</p>
+                            </div>
                         </div>
                         <div class="button">
                             <p onClick={() => addToPlaylist(track)}>+</p>
