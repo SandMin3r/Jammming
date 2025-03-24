@@ -1,40 +1,44 @@
 import styles from './Playlist.module.css';
 
-function Playlist({playlist, removeFromPlaylist, playlistName, setPlaylistName, saveToSpotify}) {
+function Playlist({playlistTracks, removeFromPlaylist, playlistName, setPlaylistName, saveToSpotify, startNewPlaylist}) {
     return(
         <div>
             <input 
                 type="text"
                 id="playlistName"
-                value={playlistName}
+                value={playlistName || ''}
                 onChange={(e) => setPlaylistName(e.target.value)}
                 placeholder="Playlist name"
                 className={styles.form__field}
             ></input>
-            {playlist.length > 0 ? (
-                playlist.map(track => (
-                    <div key={track.id} class="track">
-                        <div class="inline">
-                            <img
-                                src={track.album.images[1].url}
-                                alt={track.album.name}></img>
+            {playlistTracks.length > 0 ? (
+                playlistTracks.map(track => (
+                    <div key={track.id} className="track">
+                        <div className="inline">
+                            {track.album.images[0] ? (
+                                <img 
+                                    src={track.album.images[0].url}
+                                    alt="note"></img>
+                            ) : (
+                                <img 
+                                    src={require('./images/music-note.png')}
+                                    alt="note"></img>
+                            )} 
                             <div>
                                 <h3>{track.name}</h3>
                                 <p>{track.artists.map(artist => artist.name).join(', ')} - {track.album.name}</p>
                             </div>
                         </div>
-                        <div class="button">
+                        <div className="button">
                             <p onClick={() => removeFromPlaylist(track.id)}>-</p>
                         </div>
                     </div>
                 ))
-                ) : (
+            ) : (
                     <p>No songs in playlist.</p>
-                )}
-            <button 
-                onClick={saveToSpotify}
-                disabled={playlist.length === 0}
-            >Save to Spotify</button>
+            )}
+            {playlistTracks.length > 0 && <button onClick={saveToSpotify} disabled={playlistTracks.length === 0} >Save to Spotify</button>}
+            {playlistName && <button onClick={startNewPlaylist} className="startNewPlaylist">Start new playlist</button>}
         </div>
     )
 };

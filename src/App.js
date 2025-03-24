@@ -8,10 +8,14 @@ import UserPlaylists from './components/UserPlaylists';
 
 function App() {
   const [searchResults, setSearchResults] = useState([]);
-  const [playlist, setPlaylist] = useState([]);
-  const [playlistName, setPlaylistName] = useState('');
+  const [playlistTracks, setPlaylistTracks] = useState([]);
+  const [playlistName, setPlaylistName] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [userPlaylists, setUserPlaylists] = useState([]);
+  const [selectedUserPlaylist, setSelectedUserPlaylist] = useState(null);
+  const [playlistUpdated, setPlaylistUpdated] = useState(false);
+
+
 
   // Get spotify token when page loads
   useEffect(() => {
@@ -40,7 +44,7 @@ function App() {
     };
 
     fetchUserPlaylists();
-}, [accessToken]); // Re-run when accessToken changes
+}, [accessToken, playlistUpdated]);
 
 
   // Search for songs on Spotify
@@ -55,69 +59,127 @@ function App() {
   
   // Add song to  playlist
   function addToPlaylist(track) {
-    setPlaylist([...playlist, track]);
+    setPlaylistTracks([...playlistTracks, track]);
   };
 
   // Remove song from playlist
   function removeFromPlaylist(trackID) {
-    setPlaylist(playlist.filter(track => track.id !== trackID));
+    setPlaylistTracks(playlistTracks.filter(track => track.id !== trackID));
+  };
+
+  // Load user playlist on to Playlist component
+  const fetchPlaylistTracks = async (playlistId) => {
+    if (!accessToken) return;
+
+    try {
+        const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+            headers: { Authorization: `Bearer ${accessToken}` }
+        });
+
+        const data = await response.json();
+        //console.log("Fetched Playlist Data:", data);
+
+        if (!data.tracks || !data.tracks.items) {
+            console.error("No tracks found in playlist response:", data);
+            setPlaylistTracks([]); // Empty if no tracks
+            return;
+        }
+
+        const tracks = data.tracks.items.map(item => {
+            if (!item.track) return null; // Avoid errors if track is missing
+            return {
+                id: item.track.id,
+                name: item.track.name,
+                artists: item.track.artists,
+                album: item.track.album,
+                uri: item.track.uri
+            };
+        }).filter(track => track !== null); // Remove null values
+
+        setPlaylistTracks(tracks);
+    } catch (error) {
+        console.error("Error fetching playlist tracks:", error);
+    }
+  };
+
+  const handlePlaylistClick = (playlist) => {
+    setPlaylistName(playlist.name);
+    setSelectedUserPlaylist(playlist);
+    fetchPlaylistTracks(playlist.id);
+  };
+
+  // Clear UserSelectedPlaylist so you can make a new one.
+  const startNewPlaylist = () => {
+    setPlaylistName(null);
+    setPlaylistTracks([]);
+    setSelectedUserPlaylist(null);
   };
 
   // Save playlist to spotify
   async function saveToSpotify() {
-    if (!accessToken || playlist.length === 0) {
-      alert("Please log in and add songs to your playlist.");
-      return;
+    if (!accessToken || playlistTracks.length === 0) {
+        alert("Please log in and add songs to your playlist.");
+        return;
     }
 
     try {
-      // Get user ID
-      const userResponse = await fetch("https://api.spotify.com/v1/me", {
-          headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      const userData = await userResponse.json();
-      const userId = userData.id;
+        let playlistId;
 
-      // Create a new Spotify playlist
-      const createPlaylistResponse = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
-          method: "POST",
-          headers: { 
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-              name: playlistName,
-              description: "Created with Jammming",
-              public: false
-          })
-      });
+        // Check if editing an existing playlist
+        if (selectedUserPlaylist) {
+            playlistId = selectedUserPlaylist.id;
+        } else {
+            // Fetch the user's ID
+            const userResponse = await fetch(`https://api.spotify.com/v1/me`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            const userData = await userResponse.json();
+            const userId = userData.id;
 
-      const playlistData = await createPlaylistResponse.json();
-      const playlistId = playlistData.id;
+            // Create a new playlist
+            const createResponse = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: playlistName, // This is a string, so it's fine here
+                    description: "Created with Jammming!",
+                    public: true
+                })
+            });
 
-      // Add tracks to the newly created playlist
-      const trackUris = playlist.map(track => track.uri);
-      await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-          method: "POST",
-          headers: { 
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ uris: trackUris })
-      });
+            const newPlaylist = await createResponse.json();
+            playlistId = newPlaylist.id;
+        }
 
-        alert("Playlist saved to Spotify!");
+        // Add tracks to the playlist
+        await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                uris: playlistTracks.map(track => track.uri)
+            })
+        });
+
+        alert("Playlist saved successfully!");
+        setPlaylistUpdated(prev => !prev);
     } catch (error) {
         console.error("Error saving playlist:", error);
         alert("There was an issue saving your playlist.");
-    }};
+    }
+};
 
 
 
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Ja<span class="purpleM">mmm</span>ing</h1>
+        <h1>Ja<span className="purpleM">mmm</span>ing</h1>
         <SearchBar 
           onSearch={handleSearch} />
       </header>
@@ -139,16 +201,18 @@ function App() {
               </div>
               <div id="playlist">
                 <Playlist 
-                  playlist={playlist} 
+                  playlistTracks={playlistTracks}
                   removeFromPlaylist={removeFromPlaylist}
-                  playlistName={playlistName}
-                  setPlaylistName={setPlaylistName}
-                  saveToSpotify={saveToSpotify} />
+                  playlistName={playlistName || ''}
+                  setPlaylistName={(name) => setPlaylistName(name)}
+                  saveToSpotify={saveToSpotify}
+                  startNewPlaylist={startNewPlaylist} />
               </div>
             </div>
-            <div id="userPlaylists">
+            <div className="userPlaylists">
               <UserPlaylists 
-                playlists={userPlaylists} />
+                playlists={userPlaylists}
+                onPlaylistClick={handlePlaylistClick} />
             </div>
           </>
         )}
