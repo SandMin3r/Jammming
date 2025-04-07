@@ -74,6 +74,7 @@ h1 .purpleM {
 .inline {
   width: 50%;
   display: flex;
+  border-bottom: 1px solid rgb(255, 255, 255, 0.4);
 }
 
 .track img {
