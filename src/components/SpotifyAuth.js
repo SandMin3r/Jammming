@@ -1,5 +1,8 @@
 const clientId = "ce94848da8844c0ab955dfb896523c44";  //Spotify Client ID
-const redirectUri = "http://localhost:3000/callback";  
+//use following line for netlify
+const redirectUri = "https://jammmingsand.netlify.app/callback";
+//following line used for local development
+//const redirectUri = 'http://localhost:3000/callback';
 const scopes = [
     "playlist-modify-public",
     "playlist-modify-private",
