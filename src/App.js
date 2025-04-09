@@ -19,11 +19,15 @@ function App() {
 
   // Get spotify token when page loads
   useEffect(() => {
-    const token = getAccessTokenFromUrl();
-    if (token) {
+    const timeout = setTimeout(() => {
+      const token = getAccessTokenFromUrl();
+      if (token) {
         setAccessToken(token);
-        window.history.pushState({}, null, "/");  // Remove token from URL
-    }
+        window.history.pushState({}, null, "/");
+      }
+    }, 100); // 100ms delay
+  
+    return () => clearTimeout(timeout); // clean up on unmount
   }, []);
 
   //Load Users Playlists
