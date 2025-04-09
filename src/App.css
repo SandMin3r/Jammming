@@ -177,3 +177,7 @@ button:focus {
   margin-right: 5px;
   border-radius: 10px;
 }
+
+.userPlaylists :hover {
+  cursor: pointer;
+}

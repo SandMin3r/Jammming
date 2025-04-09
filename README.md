@@ -45,9 +45,6 @@ The app is made up of the following React components:
 
 ## 🧪 Getting Started
 
-Clone the repo and install dependencies:
+Take a look at it:
 
-```bash
-git clone https://github.com/SandMin3r/Jammming.git
-cd Jammming
-npm install
+https://jammmingsand.netlify.app/
